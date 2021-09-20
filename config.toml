@@ -1,0 +1,32 @@
+[app]
+name     = "Mesh"
+env      = 0
+port     = ":9090"
+
+[database]
+driver     = "mysql"
+name       = "mesh"
+host       = "127.0.0.1"
+username   = "root"
+password   = ""
+parse_time = true
+
+[cache]
+driver     = "redis"
+
+[logger]
+max_size    = 1 
+max_backups = 5
+max_age     = 1
+directory   = ""
+
+[redis]
+addresses    = ["127.0.0.1:6379"]
+password     = ""
+database     = 0
+timeout      = 15
+
+[log]
+output   = 0
+max_age  = 24
+max_size = 0.5
