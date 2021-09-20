@@ -1,10 +1,10 @@
 package cache
 
 import (
-	"time"
-	"sync"
 	"bytes"
 	"encoding/gob"
+	"sync"
+	"time"
 
 	"github.com/codemaestro64/skeleton/config"
 )
@@ -29,7 +29,7 @@ type Store interface {
 	Remove(key string) error
 	// Remove all items from cache
 	Flush()
-	// Close 
+	// Close
 	Close()
 }
 
@@ -38,7 +38,7 @@ type Cache struct {
 }
 
 var (
-	driverFuncMap = map[string]func(cfg *config.Config) (Store, error) {
+	driverFuncMap = map[string]func(cfg *config.Config) (Store, error){
 		"redis": NewRedis,
 	}
 )
@@ -58,7 +58,7 @@ func New(cfg *config.Config) (*Cache, error) {
 }
 
 func (c *Cache) Put(key string, data interface{}, duration int64) error {
-	return c.store.Put(key, data, time.Duration(duration) * time.Second)
+	return c.store.Put(key, data, time.Duration(duration)*time.Second)
 }
 
 func (c *Cache) Has(key string) (bool, error) {
@@ -78,31 +78,29 @@ func (c *Cache) Add(key string, data interface{}, duration int64) error {
 	return c.Put(key, data, duration)
 }
 
-func (c *Cache) Get(key string, dest *interface{}) error {
+func (c *Cache) Get(key string) (interface{}, error) {
 	res, err := c.store.Get(key)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	*dest = res
-
-	return nil
+	
+	return res, nil
 }
 
-func (c *Cache) GetOrDefault(key string, def interface{}, dest *interface{}) error {
+func (c *Cache) GetOrDefault(key string, def interface{}) (interface{}, error) {
 	has, err := c.Has(key)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
 	if !has {
-		*dest = def  
-		return nil
+		return def, nil
 	}
 
-	return c.Get(key, dest)
+	return c.Get(key)
 }
 
-func (c *Cache) Remember(key string, duration int64, cb func() interface{}, dest *interface{}) error {
+func (c *Cache) Remember(key string, duration int64, cb func() interface{}) error {
 	has, err := c.Has(key)
 	if err != nil {
 		return err
@@ -110,13 +108,13 @@ func (c *Cache) Remember(key string, duration int64, cb func() interface{}, dest
 
 	var data interface{}
 	if !has {
-		data = cb() 
+		data = cb()
 	}
 
 	return c.Put(key, data, duration)
 }
 
-func (c *Cache) RememberForever(key string, cb func() interface{}, dest *interface{}) error {
+func (c *Cache) RememberForever(key string, cb func() interface{}) error {
 	has, err := c.Has(key)
 	if err != nil {
 		return err
@@ -124,10 +122,10 @@ func (c *Cache) RememberForever(key string, cb func() interface{}, dest *interfa
 
 	var data interface{}
 	if !has {
-		data = cb() 
+		data = cb()
 	}
 
-	return c.Put(key, data, 86400 * 365)
+	return c.Put(key, data, 86400*365)
 }
 
 func (c *Cache) Remove(key string) error {
@@ -135,7 +133,7 @@ func (c *Cache) Remove(key string) error {
 }
 
 func (c *Cache) Flush() {
-	var wg sync.WaitGroup 
+	var wg sync.WaitGroup
 	wg.Add(1)
 
 	go func() {

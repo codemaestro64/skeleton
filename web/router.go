@@ -38,6 +38,7 @@ func (s *Server) resolveHandler(handler Handler) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
 		c := &context.AppContext{
 			Context: ctx,
+			Cache: s.cache,
 		}
 
 		handler(c)

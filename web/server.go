@@ -70,12 +70,20 @@ func (s *Server) Shutdown() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
+	s.logger.Info().Msg("Quit signal received...")
+
 	// close database connection
 	if s.db != nil {
 		s.logger.Info().Msg("Closing database connection...")
 		if err := s.db.Disconnect(); err != nil {
 			s.logger.Fatal().Msg(err.Error())
 		}
+	}
+
+	// flush cache 
+	if s.cache != nil {
+		s.logger.Info().Msg("Flushing cache...")
+		s.cache.Flush()
 	}
 
 	// shutdown http server

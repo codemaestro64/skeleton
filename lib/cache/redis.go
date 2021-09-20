@@ -1,9 +1,9 @@
 package cache
 
 import (
+	"context"
 	"fmt"
 	"time"
-	"context"
 
 	"github.com/codemaestro64/skeleton/config"
 	"github.com/go-redis/redis/v8"
@@ -11,7 +11,7 @@ import (
 
 type Redis struct {
 	client redis.UniversalClient
-	config config.RedisConfig 
+	config config.RedisConfig
 }
 
 const redis_prefix = "REDIS"
@@ -38,12 +38,11 @@ func (r *Redis) getTimeoutContext() context.Context {
 	return ctx
 }
 
-
 func (r *Redis) Put(key string, data interface{}, duration time.Duration) error {
 	_, err := r.client.Set(r.getTimeoutContext(), key, data, duration).Result()
 	if err != nil {
 		return fmt.Errorf("%s: error putting item: %s", redis_prefix, err.Error())
-	} 
+	}
 
 	return nil
 }
@@ -75,11 +74,11 @@ func (r *Redis) Get(key string) (interface{}, error) {
 }**/
 
 /**func (r *Redis) Remember(key string, duration int64, cb func() interface{}) {
-	
+
 }**/
 
 /**func (r *Redis) RememberForever(key string, cb func() interface{}) {
-	
+
 }**/
 
 /**func (r *Redis) Pull(key string) interface{} {
@@ -91,7 +90,7 @@ func (r *Redis) Remove(key string) error {
 	if err != nil {
 		return fmt.Errorf("%s: error deleting item: %s", redis_prefix, err.Error())
 	}
-	
+
 	return nil
 }
 
