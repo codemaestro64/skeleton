@@ -5,9 +5,8 @@ import (
 	"os"
 	"path"
 
-	"github.com/rs/zerolog"
-	//"github.com/rs/zerolog/log"
 	"github.com/codemaestro64/skeleton/config"
+	"github.com/rs/zerolog"
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
@@ -20,8 +19,10 @@ func New(cfg *config.LoggerConfig, env config.Environment) *Logger {
 
 	filename := path.Join(cfg.Directory, "log.txt")
 	writers = append(writers, newRollingFile(cfg, filename))
-	if env == config.DevelopmentEnv {
-		writers = append(writers, zerolog.ConsoleWriter{Out: os.Stderr})
+	if env == config.ProductionEnv {
+		writers = []io.Writer{newRollingFile(cfg, filename)}
+	} else {
+		writers = []io.Writer{zerolog.ConsoleWriter{Out: os.Stderr}}
 	}
 	mw := io.MultiWriter(writers...)
 

@@ -34,7 +34,7 @@ func NewRedis(cfg *config.Config) (Store, error) {
 }
 
 func (r *Redis) getTimeoutContext() context.Context {
-	ctx, _ := context.WithTimeout(context.Background(), time.Duration(r.config.Timeout)*time.Second)
+	ctx, _ := context.WithTimeout(context.Background(), r.config.Timeout*time.Second)
 	return ctx
 }
 
@@ -46,10 +46,6 @@ func (r *Redis) Put(key string, data interface{}, duration time.Duration) error 
 
 	return nil
 }
-
-/**func (r *Redis) Add(key string, data interface{}) bool {
-	return false
-}**/
 
 func (r *Redis) Has(key string) (bool, error) {
 	exists, err := r.client.Exists(r.getTimeoutContext(), key).Result()
@@ -68,22 +64,6 @@ func (r *Redis) Get(key string) (interface{}, error) {
 
 	return val, nil
 }
-
-/**func (r *Redis) GetOrDefault(key string, data interface{}) interface{} {
-	return false
-}**/
-
-/**func (r *Redis) Remember(key string, duration int64, cb func() interface{}) {
-
-}**/
-
-/**func (r *Redis) RememberForever(key string, cb func() interface{}) {
-
-}**/
-
-/**func (r *Redis) Pull(key string) interface{} {
-	return false
-}**/
 
 func (r *Redis) Remove(key string) error {
 	_, err := r.client.Del(r.getTimeoutContext(), key).Result()

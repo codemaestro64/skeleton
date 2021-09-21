@@ -14,8 +14,8 @@ func NewHomeController() *HomeController {
 }
 
 func (c *HomeController) GetIndex(ctx *context.AppContext) {
-	ctx.Cache.Put("name", "Michael", 86400)
-	
+	//ctx.Cache.Put("name", "Michael", 86400)
+
 	name, err := ctx.Cache.Get("name")
 	if err != nil {
 		res := map[string]interface{}{

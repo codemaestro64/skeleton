@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/codemaestro64/skeleton/config"
 	_ "github.com/go-sql-driver/mysql"
@@ -25,6 +26,11 @@ func Connect(cfg config.DatabaseConfig) (*Database, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error pinging database: %s", err.Error())
 	}
+
+	// https://github.com/go-sql-driver/mysql/issues/461
+	conn.SetConnMaxLifetime(time.Minute * cfg.ConnMaxLifetime)
+	conn.SetMaxIdleConns(cfg.MaxIdleConns)
+	conn.SetMaxOpenConns(cfg.MaxOpenConns)
 
 	return &Database{
 		connection: conn,

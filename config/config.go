@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/BurntSushi/toml"
 )
@@ -21,12 +22,15 @@ type (
 	}
 
 	DatabaseConfig struct {
-		Driver    string `toml:"driver"`
-		Name      string `toml:"name"`
-		Host      string `toml:"host"`
-		Username  string `toml:"username"`
-		Password  string `toml:"password"`
-		ParseTime bool   `toml:"parse_time"`
+		Driver          string        `toml:"driver"`
+		Name            string        `toml:"name"`
+		Host            string        `toml:"host"`
+		Username        string        `toml:"username"`
+		Password        string        `toml:"password"`
+		ParseTime       bool          `toml:"parse_time"`
+		MaxIdleConns    int           `toml:"max_idle_conns"`
+		MaxOpenConns    int           `toml:"max_open_conns"`
+		ConnMaxLifetime time.Duration `toml:"conn_max_lifetime"`
 	}
 
 	LoggerConfig struct {
@@ -41,10 +45,10 @@ type (
 	}
 
 	RedisConfig struct {
-		Addresses []string `toml:"addresses"`
-		Password  string   `toml:"password"`
-		Database  int      `toml:"database"`
-		Timeout   int64    `toml:"timeout"` // in seconds
+		Addresses []string      `toml:"addresses"`
+		Password  string        `toml:"password"`
+		Database  int           `toml:"database"`
+		Timeout   time.Duration `toml:"timeout"` // in seconds
 	}
 
 	Config struct {

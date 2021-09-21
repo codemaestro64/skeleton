@@ -83,7 +83,7 @@ func (c *Cache) Get(key string) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return res, nil
 }
 

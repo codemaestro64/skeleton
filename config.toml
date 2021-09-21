@@ -4,12 +4,15 @@ env      = 0
 port     = ":9090"
 
 [database]
-driver     = "mysql"
-name       = "mesh"
-host       = "127.0.0.1"
-username   = "root"
-password   = ""
-parse_time = true
+driver            = "mysql"
+name              = "mesh"
+host              = "127.0.0.1"
+username          = "root"
+password          = ""
+parse_time        = true
+max_idle_conns    = 0 
+max_open_conns    = 20
+conn_max_lifetime = 5 
 
 [cache]
 driver     = "redis"
@@ -26,7 +29,3 @@ password     = ""
 database     = 0
 timeout      = 15
 
-[log]
-output   = 0
-max_age  = 24
-max_size = 0.5

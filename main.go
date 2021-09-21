@@ -19,7 +19,7 @@ const (
 
 func createDataDirIfNotExists(logDir string) error {
 	if err := os.MkdirAll(logDir, os.ModePerm); err != nil {
-		return fmt.Errorf("error creating directory: %s: %s", logDir, err.Error())
+		return fmt.Errorf("error creating directories: %s", err.Error())
 	}
 
 	return nil
@@ -33,12 +33,13 @@ func mainCore() error {
 
 	// get data directory path
 	dataDir := lib.AppDataDir(strings.ToLower(cfg.App.Name), true)
-	cfg.Logger.Directory = filepath.Join(dataDir, "logs")
+	logDir := filepath.Join(dataDir, "logs")
 
-	err = createDataDirIfNotExists(cfg.Logger.Directory)
+	err = createDataDirIfNotExists(logDir)
 	if err != nil {
 		return err
 	}
+	cfg.Logger.Directory = logDir
 
 	// init logger
 	logger := logger.New(&cfg.Logger, cfg.App.Env)
