@@ -116,10 +116,13 @@ func (s *Server) DELETE(path string, handler Handler) {
 
 func (s *Server) resolveHandler(handler Handler) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
+		s.db.NewSession()
+
 		c := &appContext.AppContext{
 			Context: ctx,
 			Cache:   s.cache,
 			Logger:  s.logger,
+			DB:      s.db,
 		}
 
 		handler(c)

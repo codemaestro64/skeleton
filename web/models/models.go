@@ -9,10 +9,25 @@ import (
 	"github.com/gocraft/dbr"
 )
 
+type Model interface {
+	/**First()
+	Find()
+	Create()
+	Update(m Model)
+	Delete()**/
+}
+
+type session struct {
+	*dbr.Session
+}
+
 type Database struct {
 	connection *dbr.Connection
-	session    *dbr.Session
+	session    *session
+	models     map[string]Model
 }
+
+const Models = "MODELS"
 
 func Connect(cfg config.DatabaseConfig) (*Database, error) {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?parseTime=%t", cfg.Username, cfg.Password, cfg.Host, cfg.Name, cfg.ParseTime)
@@ -32,13 +47,14 @@ func Connect(cfg config.DatabaseConfig) (*Database, error) {
 	conn.SetMaxIdleConns(cfg.MaxIdleConns)
 	conn.SetMaxOpenConns(cfg.MaxOpenConns)
 
-	return &Database{
-		connection: conn,
-	}, nil
+	d := &Database{connection: conn}
+	d.registerModels()
+
+	return d, nil
 }
 
 func (d *Database) NewSession() *Database {
-	d.session = d.connection.NewSession(nil)
+	d.session = &session{d.connection.NewSession(nil)}
 	return d
 }
 
@@ -51,4 +67,29 @@ func (d *Database) Disconnect() error {
 	}
 
 	return nil
+}
+
+func (d *Database) GetModel(name string) (Model, error) {
+	if model, ok := d.models[name]; ok {
+		return model, nil
+	}
+
+	return nil, fmt.Errorf("%s: %s is not registered", Models, name)
+}
+
+func (d *Database) registerModelOnce(name string, model Model) {
+	if _, ok := d.models[name]; !ok {
+		d.registerModel(name, model)
+	}
+}
+
+func (d *Database) registerModel(name string, model Model) {
+	if d.models == nil {
+		d.models = make(map[string]Model)
+	}
+	d.models[name] = model
+}
+
+func (d *Database) registerModels() {
+	d.registerUserModel()
 }
