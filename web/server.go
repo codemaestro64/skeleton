@@ -9,7 +9,6 @@ import (
 	"github.com/codemaestro64/skeleton/config"
 	"github.com/codemaestro64/skeleton/lib/cache"
 	"github.com/codemaestro64/skeleton/lib/logger"
-	appContext "github.com/codemaestro64/skeleton/web/context"
 	"github.com/codemaestro64/skeleton/web/models"
 	"github.com/labstack/echo/v4"
 )
@@ -91,41 +90,5 @@ func (s *Server) Shutdown() {
 	s.logger.Info().Msg("Shutting down server...")
 	if err := s.echo.Shutdown(ctx); err != nil {
 		s.logger.Fatal().Msg(err.Error())
-	}
-}
-
-func (s *Server) GET(path string, handler Handler) {
-	s.echo.GET(path, s.resolveHandler(handler))
-}
-
-func (s *Server) POST(path string, handler Handler) {
-	s.echo.POST(path, s.resolveHandler(handler))
-}
-
-func (s *Server) PUT(path string, handler Handler) {
-	s.echo.PUT(path, s.resolveHandler(handler))
-}
-
-func (s *Server) PATCH(path string, handler Handler) {
-	s.echo.PATCH(path, s.resolveHandler(handler))
-}
-
-func (s *Server) DELETE(path string, handler Handler) {
-	s.echo.DELETE(path, s.resolveHandler(handler))
-}
-
-func (s *Server) resolveHandler(handler Handler) echo.HandlerFunc {
-	return func(ctx echo.Context) error {
-		s.db.NewSession()
-
-		c := &appContext.AppContext{
-			Context: ctx,
-			Cache:   s.cache,
-			Logger:  s.logger,
-			DB:      s.db,
-		}
-
-		handler(c)
-		return nil
 	}
 }
