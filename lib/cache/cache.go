@@ -11,20 +11,10 @@ import (
 
 type Store interface {
 	Put(key string, data interface{}, duration time.Duration) error
-	// Add adds the item only if it doesn't exist
-	//Add(key string, data interface{}) bool
 	// Check if item exists in cache
 	Has(key string) (bool, error)
 	// Get an item from the cache
 	Get(key string) (interface{}, error)
-	// Get an item. Return the specified default if item doesn't exists
-	//GetOrDefault(key string, def interface{}) interface{}
-	// Get an item from the cache. If it doesn't exist store a default value returned in the closure
-	//Remember(key string, duration int64, cb func() interface{})
-	// Remember without a time limit
-	//RememberForever(key string, cb func() interface{})
-	// Get the item and delete it from the cache
-	//Pull(key string) interface{}
 	// Remove item from cache
 	Remove(key string) error
 	// Remove all items from cache

@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"net/http"
+	//"net/http"
 
 	"github.com/codemaestro64/skeleton/web/context"
 )
@@ -14,9 +14,16 @@ func NewHomeController() *HomeController {
 }
 
 func (c *HomeController) GetIndex(ctx *context.AppContext) {
+	res := map[string]interface{}{
+		"id":   15,
+		"name": "Michael",
+	}
+
+	ctx.WithStatusCode(403).JSON(res)
+
 	//ctx.Cache.Put("name", "Michael", 86400)
 
-	name, err := ctx.Cache.Get("name")
+	/**name, err := ctx.Cache.Get("name")
 	if err != nil {
 		res := map[string]interface{}{
 			"error": err.Error(),
@@ -30,5 +37,7 @@ func (c *HomeController) GetIndex(ctx *context.AppContext) {
 		"name": name.(string),
 	}
 
-	ctx.JSON(http.StatusOK, res)
+	ctx.JSON(http.StatusOK, res)**/
+
+	//ctx.Response.Write([]byte("hello world"))
 }

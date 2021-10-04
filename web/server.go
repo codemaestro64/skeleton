@@ -1,33 +1,39 @@
 package web
 
 import (
-	"context"
-	"os"
-	"os/signal"
-	"time"
+	//"context"
+	//"os"
+	//"os/signal"
+	//"time"
+	"net/http"
+	"sync"
 
 	"github.com/codemaestro64/skeleton/config"
 	"github.com/codemaestro64/skeleton/lib/cache"
 	"github.com/codemaestro64/skeleton/lib/logger"
+	appContext "github.com/codemaestro64/skeleton/web/context"
 	"github.com/codemaestro64/skeleton/web/models"
-	"github.com/labstack/echo/v4"
+	"github.com/go-chi/chi/v5"
 )
 
 type Server struct {
-	echo   *echo.Echo
+	router *chi.Mux
 	config *config.Config
 	db     *models.Database
 	cache  *cache.Cache
 	logger *logger.Logger
+	pool   sync.Pool
 }
 
 func NewServer(cfg *config.Config, logger *logger.Logger) (*Server, error) {
 	s := &Server{
 		config: cfg,
-		echo:   echo.New(),
+		router: chi.NewRouter(),
 		logger: logger,
 	}
-	s.echo.HideBanner = true
+	s.pool.New = func() interface{} {
+		return appContext.New()
+	}
 
 	// open database connection
 	logger.Info().Msg("Attempting database connection...")
@@ -52,18 +58,22 @@ func NewServer(cfg *config.Config, logger *logger.Logger) (*Server, error) {
 }
 
 func (s *Server) Serve() error {
-	go func() {
+	s.logger.Info().Str("port", s.config.App.Port).Msg("Serving...")
+	http.ListenAndServe(s.config.App.Port, s.router)
+	s.Shutdown()
+
+	/**go func() {
 		if err := s.echo.Start(s.config.App.Port); err != nil {
 			s.logger.Info().Msg("shutting down the server")
 		}
 	}()
 
-	s.Shutdown()
+	s.Shutdown()**/
 	return nil
 }
 
 func (s *Server) Shutdown() {
-	quit := make(chan os.Signal, 1)
+	/**quit := make(chan os.Signal, 1)
 
 	signal.Notify(quit, os.Interrupt)
 	<-quit
@@ -90,5 +100,5 @@ func (s *Server) Shutdown() {
 	s.logger.Info().Msg("Shutting down server...")
 	if err := s.echo.Shutdown(ctx); err != nil {
 		s.logger.Fatal().Msg(err.Error())
-	}
+	}**/
 }

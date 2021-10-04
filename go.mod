@@ -3,6 +3,7 @@ module github.com/codemaestro64/skeleton
 go 1.14
 
 require (
+	github.com/go-chi/chi/v5 v5.0.3
 	github.com/BurntSushi/toml v0.3.1
 	github.com/go-redis/redis/v8 v8.11.3
 	github.com/go-sql-driver/mysql v1.4.1

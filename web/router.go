@@ -1,6 +1,67 @@
 package web
 
 import (
+	"net/http"
+
+	appContext "github.com/codemaestro64/skeleton/web/context"
+)
+
+type HandlerFunc func(*appContext.AppContext)
+type MiddlewareFunc func(*appContext.AppContext) bool
+
+func (s *Server) USE(middleware ...MiddlewareFunc) {
+	for _, v := range middleware {
+		s.router.Use(s.resolveMiddlewareFunc(v))
+	}
+}
+
+func (s *Server) GET(path string, handler HandlerFunc) {
+	s.router.Get(path, s.resolveHandlerFunc(handler))
+}
+
+func (s *Server) POST(path string, handler HandlerFunc) {
+	s.router.Post(path, s.resolveHandlerFunc(handler))
+}
+
+func (s *Server) PUT(path string, handler HandlerFunc) {
+	s.router.Put(path, s.resolveHandlerFunc(handler))
+}
+
+func (s *Server) PATCH(path string, handler HandlerFunc) {
+	s.router.Patch(path, s.resolveHandlerFunc(handler))
+}
+
+func (s *Server) DELETE(path string, handler HandlerFunc) {
+	s.router.Delete(path, s.resolveHandlerFunc(handler))
+}
+
+func (s *Server) resolveHandlerFunc(handler HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		handler(s.resolveContext(w, r))
+	}
+}
+
+func (s *Server) resolveMiddlewareFunc(middleware MiddlewareFunc) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if middleware(s.resolveContext(w, r)) {
+				next.ServeHTTP(w, r)
+			}
+		})
+	}
+}
+
+func (s *Server) resolveContext(w http.ResponseWriter, r *http.Request) *appContext.AppContext {
+	ctx := s.pool.Get().(*appContext.AppContext)
+	ctx.Setup(w, r)
+	ctx.SetDB(s.db)
+	ctx.SetLogger(s.logger)
+	ctx.SetCache(s.cache)
+
+	return ctx
+}
+
+/**import (
 	appContext "github.com/codemaestro64/skeleton/web/context"
 	"github.com/labstack/echo/v4"
 )
@@ -108,3 +169,4 @@ func (s *Server) resolveMiddlewareFuncs(middleware []MiddlewareFunc) []echo.Midd
 
 	return m
 }
+**/
