@@ -1,11 +1,11 @@
 package web
 
 import (
-	//"context"
-	//"os"
-	//"os/signal"
-	//"time"
+	"context"
+	"fmt"
 	"net/http"
+	"os"
+	"os/signal"
 	"sync"
 
 	"github.com/codemaestro64/skeleton/config"
@@ -58,27 +58,37 @@ func NewServer(cfg *config.Config, logger *logger.Logger) (*Server, error) {
 }
 
 func (s *Server) Serve() error {
-	s.logger.Info().Str("port", s.config.App.Port).Msg("Serving...")
-	http.ListenAndServe(s.config.App.Port, s.router)
-	s.Shutdown()
+	ctx, cancel := context.WithCancel(context.Background())
 
-	/**go func() {
-		if err := s.echo.Start(s.config.App.Port); err != nil {
-			s.logger.Info().Msg("shutting down the server")
+	srv := http.Server{Addr: s.config.App.Port, Handler: s}
+	go func(srv http.Server) {
+		fmt.Println("ssss")
+
+		s.logger.Info().Str("port", s.config.App.Port).Msg("Serving...")
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			s.logger.Fatal().Msg(err.Error())
+
+			// TODO recover from error
 		}
-	}()
 
-	s.Shutdown()**/
+	}(srv)
+
+	go s.listenForShutdown(cancel)
+
+	select {
+	case <-ctx.Done():
+		s.logger.Info().Msg("Shutting down server")
+		srv.Shutdown(ctx)
+	}
+
 	return nil
 }
 
-func (s *Server) Shutdown() {
-	/**quit := make(chan os.Signal, 1)
+func (s *Server) listenForShutdown(cancel context.CancelFunc) {
+	quit := make(chan os.Signal, 1)
 
 	signal.Notify(quit, os.Interrupt)
 	<-quit
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
 
 	s.logger.Info().Msg("Quit signal received...")
 
@@ -96,9 +106,9 @@ func (s *Server) Shutdown() {
 		s.cache.Flush()
 	}
 
-	// shutdown http server
-	s.logger.Info().Msg("Shutting down server...")
-	if err := s.echo.Shutdown(ctx); err != nil {
-		s.logger.Fatal().Msg(err.Error())
-	}**/
+	cancel()
+}
+
+func (s *Server) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	s.router.ServeHTTP(w, req)
 }
