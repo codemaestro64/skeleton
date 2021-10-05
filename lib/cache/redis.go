@@ -14,7 +14,7 @@ type Redis struct {
 	config config.RedisConfig
 }
 
-const redis_prefix = "REDIS"
+const redisPrefix = "REDIS"
 
 func NewRedis(cfg *config.Config) (Store, error) {
 	r := &Redis{
@@ -25,7 +25,10 @@ func NewRedis(cfg *config.Config) (Store, error) {
 		Addrs: cfg.Redis.Addresses,
 	})
 
-	if err := rdb.Ping(r.getTimeoutContext()).Err(); err != nil {
+	ctx, cancel := r.getTimeoutContext()
+	defer cancel()
+
+	if err := rdb.Ping(ctx).Err(); err != nil {
 		return nil, fmt.Errorf("error connecting to redis cluster: %s", err.Error())
 	}
 	r.client = rdb
@@ -33,42 +36,53 @@ func NewRedis(cfg *config.Config) (Store, error) {
 	return r, nil
 }
 
-func (r *Redis) getTimeoutContext() context.Context {
-	ctx, _ := context.WithTimeout(context.Background(), r.config.Timeout*time.Second)
-	return ctx
+func (r *Redis) getTimeoutContext() (context.Context, context.CancelFunc) {
+	return context.WithTimeout(context.Background(), r.config.Timeout*time.Second)
 }
 
 func (r *Redis) Put(key string, data interface{}, duration time.Duration) error {
-	_, err := r.client.Set(r.getTimeoutContext(), key, data, duration).Result()
+	ctx, cancel := r.getTimeoutContext()
+	defer cancel()
+
+	_, err := r.client.Set(ctx, key, data, duration).Result()
 	if err != nil {
-		return fmt.Errorf("%s: error putting item: %s", redis_prefix, err.Error())
+		return fmt.Errorf("%s: error putting item: %s", redisPrefix, err.Error())
 	}
 
 	return nil
 }
 
 func (r *Redis) Has(key string) (bool, error) {
-	exists, err := r.client.Exists(r.getTimeoutContext(), key).Result()
+	ctx, cancel := r.getTimeoutContext()
+	defer cancel()
+
+	exists, err := r.client.Exists(ctx, key).Result()
 	if err != nil {
-		return false, fmt.Errorf("%s: error checking if item exists: %s", redis_prefix, err.Error())
+		return false, fmt.Errorf("%s: error checking if item exists: %s", redisPrefix, err.Error())
 	}
 
 	return exists > 0, nil
 }
 
 func (r *Redis) Get(key string) (interface{}, error) {
-	val, err := r.client.Get(r.getTimeoutContext(), key).Result()
+	ctx, cancel := r.getTimeoutContext()
+	defer cancel()
+
+	val, err := r.client.Get(ctx, key).Result()
 	if err != nil {
-		return nil, fmt.Errorf("%s: error getting item: %s", redis_prefix, err.Error())
+		return nil, fmt.Errorf("%s: error getting item: %s", redisPrefix, err.Error())
 	}
 
 	return val, nil
 }
 
 func (r *Redis) Remove(key string) error {
-	_, err := r.client.Del(r.getTimeoutContext(), key).Result()
+	ctx, cancel := r.getTimeoutContext()
+	defer cancel()
+
+	_, err := r.client.Del(ctx, key).Result()
 	if err != nil {
-		return fmt.Errorf("%s: error deleting item: %s", redis_prefix, err.Error())
+		return fmt.Errorf("%s: error deleting item: %s", redisPrefix, err.Error())
 	}
 
 	return nil

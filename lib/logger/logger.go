@@ -18,7 +18,6 @@ func New(cfg *config.LoggerConfig, env config.Environment) *Logger {
 	var writers []io.Writer
 
 	filename := path.Join(cfg.Directory, "log.txt")
-	writers = append(writers, newRollingFile(cfg, filename))
 	if env == config.ProductionEnv {
 		writers = []io.Writer{newRollingFile(cfg, filename)}
 	} else {

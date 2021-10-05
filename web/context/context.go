@@ -32,6 +32,14 @@ func (c *AppContext) Setup(w http.ResponseWriter, req *http.Request) {
 	c.request = req
 }
 
+func (c *AppContext) Reset() {
+	//c.response = http.ResponseWriter{}
+	c.request = nil
+	c.cache = nil
+	c.logger = nil
+	c.db = nil
+}
+
 func (c *AppContext) SetCache(cache *cache.Cache) {
 	c.cache = cache
 }

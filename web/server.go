@@ -2,7 +2,6 @@ package web
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
@@ -60,10 +59,8 @@ func NewServer(cfg *config.Config, logger *logger.Logger) (*Server, error) {
 func (s *Server) Serve() error {
 	ctx, cancel := context.WithCancel(context.Background())
 
-	srv := http.Server{Addr: s.config.App.Port, Handler: s}
-	go func(srv http.Server) {
-		fmt.Println("ssss")
-
+	srv := &http.Server{Addr: s.config.App.Port, Handler: s}
+	go func(srv *http.Server) {
 		s.logger.Info().Str("port", s.config.App.Port).Msg("Serving...")
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			s.logger.Fatal().Msg(err.Error())
@@ -75,11 +72,9 @@ func (s *Server) Serve() error {
 
 	go s.listenForShutdown(cancel)
 
-	select {
-	case <-ctx.Done():
-		s.logger.Info().Msg("Shutting down server")
-		srv.Shutdown(ctx)
-	}
+	<-ctx.Done()
+	s.logger.Info().Msg("Shutting down server...")
+	srv.Shutdown(ctx)
 
 	return nil
 }

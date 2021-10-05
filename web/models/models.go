@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/codemaestro64/skeleton/config"
+	// import mysql driver
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gocraft/dbr"
 )

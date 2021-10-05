@@ -37,7 +37,10 @@ func (s *Server) DELETE(path string, handler HandlerFunc) {
 
 func (s *Server) resolveHandlerFunc(handler HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		handler(s.resolveContext(w, r))
+		ctx := s.resolveContext(w, r)
+		handler(ctx)
+		ctx.Reset()
+		s.pool.Put(ctx)
 	}
 }
 
@@ -52,6 +55,7 @@ func (s *Server) resolveMiddlewareFunc(middleware MiddlewareFunc) func(http.Hand
 }
 
 func (s *Server) resolveContext(w http.ResponseWriter, r *http.Request) *appContext.AppContext {
+	// get context from pool
 	ctx := s.pool.Get().(*appContext.AppContext)
 	ctx.Setup(w, r)
 	ctx.SetDB(s.db)

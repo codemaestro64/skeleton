@@ -19,7 +19,7 @@ func (c *HomeController) GetIndex(ctx *context.AppContext) {
 		"name": "Michael",
 	}
 
-	ctx.WithStatusCode(403).JSON(res)
+	ctx.WithStatusCode(200).JSON(res)
 
 	//ctx.Cache.Put("name", "Michael", 86400)
 
